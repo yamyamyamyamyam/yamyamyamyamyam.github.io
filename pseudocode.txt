@@ -59,3 +59,6 @@ during lapses in mongoose procs:
 				else:
 					crab
 		
+		
+mixed prio 2? mixed prio 3 depending on crab-cap?
+		
