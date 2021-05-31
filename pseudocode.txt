@@ -1,0 +1,61 @@
+first, check which hits are going to proc mongoose
+
+cheat death prio:
+during lapses in mongoose procs:
+	IF cheat death available:
+		wait
+	else:
+		IF ghostly is available:
+			hit ghostly
+			hit blade flurry if possible
+		else:
+			IF crab-capped:
+				if crab available:
+					crab
+				else:
+					evasion
+			else:
+				if evasion available:
+					evasion
+				else:
+					crab
+					
+ghostly prio:
+
+during lapses in mongoose procs:
+	if ghostly is available:
+		hit ghostly
+		hit blade flurry if possible
+	else:
+		IF crab-capped:
+			if crab available:
+				crab
+			else:
+				evasion
+		else:
+			if evasion available:
+				evasion
+			else:
+				crab
+
+mixed prio:
+
+during lapses in mongoose procs:
+	if ghostly is available:
+		hit ghostly
+		hit blade flurry if possible
+	else:
+		IF cheat death available:
+			wait
+		else:
+			IF crab-capped:
+				if crab available:
+					crab
+				else:
+					evasion
+			else:
+				if evasion available:
+					evasion
+				else:
+					crab
+		
