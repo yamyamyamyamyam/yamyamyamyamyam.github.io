@@ -49,7 +49,7 @@ function testScope() {
 	while (list.length != 0) {
 		list2 = [1, 2, 3, 4, 5];
 		list = [];
-		Console.log("a")
+		console.log("a")
 	}
-	Console.log("b")
+	console.log("b")
 }
