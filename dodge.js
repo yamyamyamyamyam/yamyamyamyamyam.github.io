@@ -50,7 +50,7 @@ function testScope() {
 	list.push(5);
 	while (list.length != 0) {
 		list.push(6969);
-		list.splice(1,2);
+		list.splice(0,2);
 		console.log(list);
 	}
 	console.log("b")
