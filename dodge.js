@@ -35,8 +35,10 @@ function simulateFight() {
 	events.push(Event(0.00, bossHit));
 	events.push(Event(0.00, mhHit));
 	events.push(Event(0.50, ohHit));
-	//how to handle recursion/event queue?
-	
+	while (events.length != 0) {
+		processNextEvent
+		events = eventsCopy;
+	}
 }
 
 function testScope() {
@@ -47,9 +49,9 @@ function testScope() {
 	list.push(4);
 	list.push(5);
 	while (list.length != 0) {
-		list2 = [1, 2, 3, 4, 5];
-		list = [];
-		console.log("a")
+		list.push(6969);
+		list.splice(1,2);
+		console.log(list)
 	}
 	console.log("b")
 }
