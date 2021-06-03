@@ -15,6 +15,32 @@ class Event {
 	}
 }
 
+class Rogue {
+	constructor(hasCrab, poolEnergy, currentAvoidance) {
+		this.lastGhostly = nil;
+		this.hasCrab = hasCrab; 
+		this.lastCrab = nil;
+		this.lastEvasion = nil;
+		this.lastCheatDeath = nil;
+		this.energy = 100;	
+		this.lastGCD = nil;
+		this.lastMongooseProc = nil;
+		this.priorityMode = nil;
+		this.poolEnergy = poolEnergy;
+		this.currentAvoidance = currentAvoidance;
+		
+	}
+	shouldUseAbility(time) {
+		if (this.energy >= 35) {
+			
+		}
+	}
+	bossHitRoll() {
+		//returns true if we got hit, false if the boss misses
+		return (Math.random() > this.currentAvoidance)
+	}
+}
+
 function setup() {
 	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
 	mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
@@ -28,7 +54,7 @@ function setup() {
 }
 
 function simulateFight() {
-	var energy = 100;
+	let player = Rogue(true);
 	var events = [];
 	//process first energy tick, boss hit, MH hit, OH hit
 	events.push(Event(0.00, energyTick));
@@ -36,8 +62,29 @@ function simulateFight() {
 	events.push(Event(0.00, mhHit));
 	events.push(Event(0.50, ohHit));
 	while (events.length != 0) {
-		processNextEvent
+		var eventsCopy = processNextEvent(events, player);
 		events = eventsCopy;
+	}
+}
+
+function processNextEvent(events, player) {
+	let event = events[0];
+	if (event.eventKind == energyTick) {
+		//increment energy
+		player.energy = Math.max(100, player.energy + 20);
+		//check if we should use an ability
+		let abilityEvent = player.shouldUseAbility(event.timestamp)
+		let tickEvent = Event(event.timestamp + 2.00, energyTick)
+	} else if (event.eventKind == bossHit) {
+		let didWeGetHit = player.bossHitRoll()
+		//
+	} else if (event.eventKind == mhHit) {
+		//check for mongoose proc, windfury proc, queue next mh hit
+		
+	} else if (event.eventKind == ohHit) {
+		//check for mongoose proc, windfury proc, queue next oh hit/possible mh hit
+	} else if (event.eventKind == abilityHit) {
+		//check for mongoose proc, NOT windfury proc, decrement energy
 	}
 }
 
@@ -48,10 +95,13 @@ function testScope() {
 	list.push(3);
 	list.push(4);
 	list.push(5);
-	while (list.length != 0) {
-		list.push(6969);
-		list.splice(0,2);
-		console.log(list);
-	}
-	console.log("b")
+	console.log(list);
+	testModifyList(list);
+	console.log(list);
+}
+
+function testModifyList(list) {
+	list.splice(0,1);
+	list.push(8);
+	console.log(list);
 }
