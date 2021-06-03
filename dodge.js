@@ -17,7 +17,7 @@ class Event {
 }
 
 class Rogue {
-	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode) {
+	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints) {
 		this.lastGhostly = nil;
 		this.hasCrab = hasCrab; 
 		this.lastCrab = nil;
@@ -31,20 +31,96 @@ class Rogue {
 		this.currentAvoidance = currentAvoidance;
 		this.isDead = false;
 		this.prioMode = prioMode;
+		this.impSNDPoints = impSNDPoints;
+		this.lastBladeFlurry = nil;
 	}
-	shouldUseAbility(time) {
-		if (this.currentAvoidance > 100 && this.poolEnergy == true && energy <= 80) {
-			//don't do anything
+	
+	ghostlyIsUp(time) {
+		return (this.lastGhostly == nil || (time - this.lastGhostly) <= 15.0);
+	}
+	crabIsUp(time) {
+		return (this.lastCrab == nil || (time - this.lastCrab) <= 180.0);
+	}
+	evasionIsUp(time) {
+		return (this.lastEvasion == nil || (time - this.lastEvasion) <= 210);
+	}
+	cheatDeathIsUp(time) {
+		return (this.lastCheatDeath == nil || (time - this.lastCheatDeath) <= 60);
+	}
+	bladeFlurryIsUp(time) {
+		return (this.lastBladeFlurry == nil || (time - this.lastBladeFlurry) <= 120);
+	}
+	crabCapped() {
+		return ((100 - this.currentAvoidance) <= CRAB_AVOIDANCE)
+	}
+	mongooseProcActive(time) {
+		if (this.lastMongooseProc == nil) {
 			return false;
+		} else {
+			return ((time - this.lastMongooseProc) <= 15.0);
 		}
-		if (this.prioMode == 1) {
+	}
+	
+	shouldUseAbility(time) {
+		if (this.currentAvoidance > 100) {
+			//if we're capped and chilling
+			//if blade flurry is up and we don't have a mongoose proc, use BF
+			if (this.bladeFlurryIsUp && this.mongooseProcActive == false) {
+				return "bladeFlurry";
+			}
+			if (this.energy > 80) {
+				//use hemo
+				return "hemo"
+			} else {
+				if (this.poolEnergy == true) {
+					return nil
+					//wait
+				} else {
+					if (this.energy > 35) {
+						return "hemo"
+						//use hemo
+					} else {
+						return nil
+						//wait 
+					}
+				}
+			}
+		} else {
+			if (this.prioMode == 1) {
+				if (this.cheatDeathIsUp) {
+					//wait
+					return nil
+				} else {
+					if (this.ghostlyIsUp) {
+						return "ghostly"
+					} else {
+						//are we crab-capped?
+						if (this.crabCapped) {
+							if (this.crabIsUp) {
+								return "crab"
+							} else if (this.evasionIsUp) {
+								return "evasion"
+							} else {
+								return nil
+							}
+						} else {
+							if (this.evasionIsUp) {
+								return "evasion"
+							} else if (this.crabIsUp) {
+								return "crab"
+							} else {
+								return nil
+							}
+						}
+					}
+				}
+			} else if (this.prioMode == 2) {
+				
+			} else if (this.prioMode == 3) {
 			
-		} else if (this.prioMode == 2) {
+			} else if (this.prioMode == 4) {
 			
-		} else if (this.prioMode == 3) {
-			
-		} else if (this.prioMode == 4) {
-			
+			}
 		}
 	}
 	bossHitRoll() {
@@ -89,44 +165,80 @@ function processNextEvent(events, player) {
 		return true;
 	}
 	if (event.eventKind == energyTick) {
-		//increment energy
-		player.energy = Math.max(100, player.energy + 20);
-		//check if we should use an ability
-		let abilityEvent = player.shouldUseAbility(event.timestamp);
-		if (abilityEvent != nil) {
-			insertEvent(events, abilityEvent);
-		}
-		let tickEvent = Event(event.timestamp + 2.00, energyTick);
-		insertEvent(events,tickEvent);
+		processEnergyTick(event, events, player);
 	} else if (event.eventKind == bossHit) {
-		//check if we got hit
-		let didWeGetHit = player.bossHitRoll()
-		//if we got hit, check if we died
-		let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
-		if (timeSinceLastCheatDeath <= 60) {
-			//we fuckin died
-			player.isDead = true;
-			return true;
-		} else {
-			player.lastCheatDeath = event.timestamp;
-		}
-		//queue next boss hit
-		let nextBossHitEvent = Event(event.timestamp + bossAttackSpeed, bossHit);
-		insertEvent(events, nextBossHitEvent);
+		processBossHit(event, events, player);
 	} else if (event.eventKind == mhHit) {
 		//check for mongoose proc, windfury proc, queue next mh hit
 	} else if (event.eventKind == ohHit) {
 		//check for mongoose proc, windfury proc, queue next oh hit/possible mh hit
 	} else if (event.eventKind == abilityHit) {
 		//check for mongoose proc, NOT windfury proc, decrement energy
-	} else if (event.eventKind == End) {
-		//check if we should use an ability
-		let abilityEvent = player.shouldUseAbility(event.timestamp);
-		if (abilityEvent != nil) {
-			insertEvent(events, abilityEvent);
-		}
+	} else if (event.eventKind == refreshSND) {
+		
+	} else if (event.eventKind == endProc) {
+		
 	}
 	return false;
+}
+
+function processEnergyTick(event, events, player) {
+	//increment energy
+	player.energy = Math.max(100, player.energy + 20);
+	//check if we should use an ability
+	let abilityToUse = player.shouldUseAbility(event.timestamp);
+	if abilityToUse != nil {
+		let newAbilityEvent = createAbilityEvent(abilityToUse, event.timestamp);
+		insertEvent(events, newAbilityEvent);
+	}
+	let tickEvent = Event(event.timestamp + 2.00, energyTick);
+	insertEvent(events, tickEvent);
+}
+
+function processBossHit(event, events, player) {
+	//check if we got hit
+	let didWeGetHit = player.bossHitRoll()
+	//if we got hit, check if we died
+	let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
+	if (timeSinceLastCheatDeath <= 60) {
+		//we fuckin died
+		player.isDead = true;
+		return true;
+	} else {
+		player.lastCheatDeath = event.timestamp;
+	}
+	//queue next boss hit
+	let nextBossHitEvent = Event(event.timestamp + bossAttackSpeed, bossHit);
+	insertEvent(events, nextBossHitEvent);
+}
+
+function processMHHit(event, events, player) {
+	
+}
+
+function processOHHit(event, events, player) {
+	
+}
+
+function processAbilityHit(event, events, player) {
+	
+}
+
+function processRefreshSND(event, events, player) {
+	//refresh snd
+	player.energy -= 25;
+	//assume it's a 5pt snd for now...because lazy
+	let nextTimestamp = event.timestamp + (21 * (1 + (.15 * player.impSNDPoints)));
+	let newRefreshEvent = Event(nextTimestamp, "refreshSND");
+}
+
+function processEndProc(event, events, player) {
+	//check if we should use an ability
+}
+
+function createAbilityEvent(abilityString, timestamp) {
+	let newAbilityEvent = Event(timestamp + .5, abilityString);
+	return newAbilityEvent;
 }
 
 function insertEvent(events, newEvent) {
@@ -146,22 +258,4 @@ function insertEvent(events, newEvent) {
 	} else {
 		events.splice(i,0);
 	}
-}
-
-function testScope() {
-	var list = [];
-	list.push(1);
-	list.push(2);
-	list.push(3);
-	list.push(4);
-	list.push(5);
-	console.log(list);
-	testModifyList(list);
-	console.log(list);
-}
-
-function testModifyList(list) {
-	list.splice(0,1);
-	list.push(8);
-	console.log(list);
 }
