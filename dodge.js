@@ -28,15 +28,21 @@ class Rogue {
 		this.priorityMode = nil;
 		this.poolEnergy = poolEnergy;
 		this.currentAvoidance = currentAvoidance;
-		
+		this.isDead = false;
 	}
 	shouldUseAbility(time) {
-		if (this.energy >= 35) {
+		if (this.prioMode == 1) {
+			
+		} else if (this.prioMode == 2) {
+			
+		} else if (this.prioMode == 3) {
+			
+		} else if (this.prioMode == 4) {
 			
 		}
 	}
 	bossHitRoll() {
-		//returns true if we got hit, false if the boss misses
+		//true if we got hit, false if the boss misses
 		return (Math.random() > this.currentAvoidance)
 	}
 }
@@ -61,30 +67,72 @@ function simulateFight() {
 	events.push(Event(0.00, bossHit));
 	events.push(Event(0.00, mhHit));
 	events.push(Event(0.50, ohHit));
-	while (events.length != 0) {
-		var eventsCopy = processNextEvent(events, player);
-		events = eventsCopy;
+	var fightOver = false;
+	while (events.length != 0 && fightOver == false) {
+		let isOver = processNextEvent(events, player);
+		fightOver = isOver;
 	}
 }
 
 function processNextEvent(events, player) {
+	//remove first event from front of list
 	let event = events[0];
+	events.splice(0,1);
+	//early return if the fight is over
+	if (event.timeStamp >= fightLength) {
+		return true;
+	}
 	if (event.eventKind == energyTick) {
 		//increment energy
 		player.energy = Math.max(100, player.energy + 20);
 		//check if we should use an ability
-		let abilityEvent = player.shouldUseAbility(event.timestamp)
-		let tickEvent = Event(event.timestamp + 2.00, energyTick)
+		let abilityEvent = player.shouldUseAbility(event.timestamp);
+		if (abilityEvent != nil) {
+			insertEvent(events, abilityEvent);
+		}
+		let tickEvent = Event(event.timestamp + 2.00, energyTick);
+		insertEvent(events,tickEvent);
 	} else if (event.eventKind == bossHit) {
+		//check if we got hit
 		let didWeGetHit = player.bossHitRoll()
-		//
+		//if we got hit, check if we died
+		let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
+		if (timeSinceLastCheatDeath <= 60) {
+			//we fuckin died
+			player.isDead = true;
+			return true;
+		} else {
+			player.lastCheatDeath = event.timestamp;
+		}
+		//queue next boss hit
+		let nextBossHitEvent = Event(event.timestamp + bossAttackSpeed, bossHit);
+		insertEvent(events, nextBossHitEvent);
 	} else if (event.eventKind == mhHit) {
 		//check for mongoose proc, windfury proc, queue next mh hit
-		
 	} else if (event.eventKind == ohHit) {
 		//check for mongoose proc, windfury proc, queue next oh hit/possible mh hit
 	} else if (event.eventKind == abilityHit) {
 		//check for mongoose proc, NOT windfury proc, decrement energy
+	}
+	return false;
+}
+
+function insertEvent(events, newEvent) {
+	let newTime = newEvent.timestamp;
+	var i = 0;
+	var found = false;
+	while (found == false && i < events.length) {
+		let event = events[i];
+		if (newTime <= event.timeStamp) {
+			found = true;
+		} else {
+			i++;
+		}
+	}
+	if (found == false) {
+		events.push(newEvent);
+	} else {
+		events.splice(i,0);
 	}
 }
 
