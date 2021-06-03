@@ -7,6 +7,7 @@ let bossHit = "bossHit"
 let mhHit = "mhHit"
 let ohHit = "ohHit"
 let abilityHit = "abilityHit"
+let procEnd = "procEnd"
 
 class Event {
 	constructor(timestamp, eventKind) {
@@ -16,7 +17,7 @@ class Event {
 }
 
 class Rogue {
-	constructor(hasCrab, poolEnergy, currentAvoidance) {
+	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode) {
 		this.lastGhostly = nil;
 		this.hasCrab = hasCrab; 
 		this.lastCrab = nil;
@@ -29,8 +30,13 @@ class Rogue {
 		this.poolEnergy = poolEnergy;
 		this.currentAvoidance = currentAvoidance;
 		this.isDead = false;
+		this.prioMode = prioMode;
 	}
 	shouldUseAbility(time) {
+		if (this.currentAvoidance > 100 && this.poolEnergy == true && energy <= 80) {
+			//don't do anything
+			return false;
+		}
 		if (this.prioMode == 1) {
 			
 		} else if (this.prioMode == 2) {
@@ -113,6 +119,12 @@ function processNextEvent(events, player) {
 		//check for mongoose proc, windfury proc, queue next oh hit/possible mh hit
 	} else if (event.eventKind == abilityHit) {
 		//check for mongoose proc, NOT windfury proc, decrement energy
+	} else if (event.eventKind == End) {
+		//check if we should use an ability
+		let abilityEvent = player.shouldUseAbility(event.timestamp);
+		if (abilityEvent != nil) {
+			insertEvent(events, abilityEvent);
+		}
 	}
 	return false;
 }
