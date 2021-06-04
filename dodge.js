@@ -1,13 +1,13 @@
 let mongoosePPM = 1.0;
 var fightLength = 780;
-var mongooseProcChanceMH = 0;
-var mongooseProcChanceOH = 0;
-let energyTick = "energyTick"
-let bossHit = "bossHit"
-let mhHit = "mhHit"
-let ohHit = "ohHit"
-let abilityHit = "abilityHit"
-let procEnd = "procEnd"
+let baseMissChance = 28;
+let baseEnemyDodgeChance = 5;
+let energyTick = "energyTick";
+let bossHit = "bossHit";
+let mhHit = "mhHit";
+let ohHit = "ohHit";
+let abilityHit = "abilityHit";
+let procEnd = "procEnd";
 
 class Event {
 	constructor(timestamp, eventKind) {
@@ -17,7 +17,7 @@ class Event {
 }
 
 class Rogue {
-	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints) {
+	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed) {
 		this.lastGhostly = nil;
 		this.hasCrab = hasCrab; 
 		this.lastCrab = nil;
@@ -33,6 +33,19 @@ class Rogue {
 		this.prioMode = prioMode;
 		this.impSNDPoints = impSNDPoints;
 		this.lastBladeFlurry = nil;
+		this.mongooseIsUp = false;
+		this.sliceAndDiceIsUp = false;
+		this.bladeFlurryIsUp = false;
+		
+		//chance for mongoose to proc
+		this.mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
+		this.mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
+		
+		//add up hit rating
+		var hitChance = hitRating / 15.77;
+		this.autoMissChance = (28 - hitChance + baseEnemyDodgeChance) / 100;
+		this.abilityMissChance = Math.floor(0, (9 - hitChance)) + baseEnemyDodgeChance;
+		
 	}
 	
 	ghostlyIsUp(time) {
@@ -51,7 +64,7 @@ class Rogue {
 		return (this.lastBladeFlurry == nil || (time - this.lastBladeFlurry) <= 120);
 	}
 	crabCapped() {
-		return ((100 - this.currentAvoidance) <= CRAB_AVOIDANCE)
+		return ((100 - this.currentAvoidance) <= CRAB_AVOIDANCE);
 	}
 	mongooseProcActive(time) {
 		if (this.lastMongooseProc == nil) {
@@ -60,13 +73,27 @@ class Rogue {
 			return ((time - this.lastMongooseProc) <= 15.0);
 		}
 	}
+	currentHaste() {
+		var weaponSpeed = this.mhSpeed
+		if (this.sliceAndDiceIsUp) {
+			weaponSpeed = weaponSpeed / 1.3;
+		}
+		if (this.bladeFlurryIsUp) {
+			weaponSpeed = weaponSpeed / 1.2;
+		}
+		return weaponSpeed;
+	}
 	
 	shouldUseAbility(time) {
 		if (this.currentAvoidance > 100) {
 			//if we're capped and chilling
 			//if blade flurry is up and we don't have a mongoose proc, use BF
 			if (this.bladeFlurryIsUp && this.mongooseProcActive == false) {
-				return "bladeFlurry";
+				if (this.energy >= 25) {
+					return "bladeFlurry";
+				} else {
+					return nil;
+				}
 			}
 			if (this.energy > 80) {
 				//use hemo
@@ -125,7 +152,15 @@ class Rogue {
 	}
 	bossHitRoll() {
 		//true if we got hit, false if the boss misses
-		return (Math.random() > this.currentAvoidance)
+		return (Math.random() > this.currentAvoidance);
+	}
+	autoHitRoll() {
+		//true if we hit, false if we miss
+		return (Math.random() > this.autoMissChance);
+	}
+	abilityHitRoll() {
+		//true if we hit, false if we miss
+		return (Math.random() > this.abilityMissChance);
 	}
 }
 
@@ -136,9 +171,6 @@ function setup() {
 	let ohSpeedSliceAndDice = ohSpeed / 1.3;
 	let mhSpeedBladeFlurrySliceAndDice = mhSpeedSliceAndDice / 1.2;
 	let ohSpeedBladeFlurrySliceAndDice = ohSpeedSliceAndDice / 1.2;
-	let baseMHAttacks = fightLength / mhSpeedBladeFlurrySliceAndDice;
-	let maxOHAttacks = fightLength / ohSpeedBladeFlurrySliceAndDice;
-	let maxMHAttacks = baseMHAttacks * 1.2
 }
 
 function simulateFight() {
@@ -150,9 +182,8 @@ function simulateFight() {
 	events.push(Event(0.00, mhHit));
 	events.push(Event(0.50, ohHit));
 	var fightOver = false;
-	while (events.length != 0 && fightOver == false) {
-		let isOver = processNextEvent(events, player);
-		fightOver = isOver;
+	while (fightOver == false) {
+		fightOver = processNextEvent(events, player);
 	}
 }
 
@@ -164,6 +195,9 @@ function processNextEvent(events, player) {
 	if (event.timeStamp >= fightLength) {
 		return true;
 	}
+	if (player.isDead == true) {
+		return true;
+	}
 	if (event.eventKind == energyTick) {
 		processEnergyTick(event, events, player);
 	} else if (event.eventKind == bossHit) {
@@ -171,7 +205,7 @@ function processNextEvent(events, player) {
 	} else if (event.eventKind == mhHit) {
 		//check for mongoose proc, windfury proc, queue next mh hit
 	} else if (event.eventKind == ohHit) {
-		//check for mongoose proc, windfury proc, queue next oh hit/possible mh hit
+		//check for mongoose proc, queue next oh hit
 	} else if (event.eventKind == abilityHit) {
 		//check for mongoose proc, NOT windfury proc, decrement energy
 	} else if (event.eventKind == refreshSND) {
@@ -203,7 +237,7 @@ function processBossHit(event, events, player) {
 	if (timeSinceLastCheatDeath <= 60) {
 		//we fuckin died
 		player.isDead = true;
-		return true;
+		return;
 	} else {
 		player.lastCheatDeath = event.timestamp;
 	}
@@ -213,6 +247,47 @@ function processBossHit(event, events, player) {
 }
 
 function processMHHit(event, events, player) {
+	let hitSuccess = player.autoHitRoll();
+	if (hitSuccess == true) {
+		let didGetWindfuryProc = Math.random() > 0.2
+		if (didGetWindfuryProc) {
+			
+		}
+		let didGetMongooseProc = Math.random() > player.mongooseProcChance
+		if (didGetMongooseProc) {
+			mongooseMHProcced(event, events, player);
+		}
+	}
+}
+
+function mongooseMHProcced(event, events, player) {
+	player.lastMongooseMHProc = event.timestamp;
+	if player.mongooseIsUp == false {
+		player.currentAvoidance += 6.00;
+		player.mongooseIsUp = true;
+	}
+	//queue mongoose proc fading
+	let mongooseFadedEvent = Event(timestamp + 15.0, "mongooseMHFaded");
+	insertEvent(events, mongooseFadedEvent);
+}
+
+function mongooseMHFaded(event, events, player) {
+	let lastMongooseTime = player.lastMongooseMHProc;
+	if (event.timestamp < 15.0) {
+		//we got another proc, so ignore this fade
+	} else {
+		player.mongooseIsUp = false;
+		player.currentavoidance -= 6.00;
+	}
+}
+
+function queueNextMHHit(event, events, player) {
+	//schedule next MH hit according to player haste
+	
+}
+
+
+function windfuryProcced(event, events, player) {
 	
 }
 
