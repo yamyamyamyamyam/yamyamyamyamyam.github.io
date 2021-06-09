@@ -174,7 +174,7 @@ function setup() {
 	let impSNDPoints = document.querySelector("#impSNDPoints");
 	let hitRating = document.querySelector("#hitRating");
 	let mhSpeed = document.querySelector("#mhSpeed");
-	let ohEnergy = document.querySelector("#ohSpeed");
+	let ohSpeed = document.querySelector("#ohSpeed");
 	let hasMongoose = document.querySelector("#hasMongoose");
 	let player = Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
 	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
