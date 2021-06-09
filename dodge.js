@@ -26,7 +26,7 @@ class Rogue {
 		this.energy = 100;	
 		this.lastGCD = null;
 		this.lastMongooseProc = null;
-		this.priorityMode = null;
+		this.prioMode = 1;
 		this.poolEnergy = poolEnergy;
 		this.currentAvoidance = currentAvoidance;
 		this.isDead = false;
