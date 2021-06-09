@@ -205,7 +205,8 @@ function processNextEvent(events, player) {
 	let event = events[0];
 	events.splice(0,1);
 	//early return if the fight is over
-	if (event.timeStamp >= fightLength) {
+	console.log(event.timestamp);
+	if (event.timestamp >= fightLength) {
 		return true;
 	}
 	if (player.isDead == true) {
