@@ -17,7 +17,7 @@ class Event {
 }
 
 class Rogue {
-	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed) {
+	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose) {
 		this.lastGhostly = nil;
 		this.hasCrab = hasCrab; 
 		this.lastCrab = nil;
@@ -36,6 +36,7 @@ class Rogue {
 		this.mongooseIsUp = false;
 		this.sliceAndDiceIsUp = false;
 		this.bladeFlurryIsUp = false;
+		this.hasMongoose = hasMongoose;
 		
 		//chance for mongoose to proc
 		this.mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
@@ -210,7 +211,17 @@ function processNextEvent(events, player) {
 		//check for mongoose proc, NOT windfury proc, decrement energy
 	} else if (event.eventKind == refreshSND) {
 		
-	} else if (event.eventKind == endProc) {
+	} else if (event.eventKind == endGhostly) {
+		
+	} else if (event.eventKind == windfuryHit) {
+		
+	} else if (event.eventKind == endCrab) {
+		
+	} else if (event.eventKind == endEvasion) {
+		
+	} else if (event.eventKind == mongooseMHFaded) {
+		
+	} else if (event.eventKind == mongooseOHFaded) {
 		
 	}
 	return false;
@@ -251,13 +262,29 @@ function processMHHit(event, events, player) {
 	if (hitSuccess == true) {
 		let didGetWindfuryProc = Math.random() > 0.2
 		if (didGetWindfuryProc) {
-			
+			windfuryProcced();
 		}
-		let didGetMongooseProc = Math.random() > player.mongooseProcChance
-		if (didGetMongooseProc) {
-			mongooseMHProcced(event, events, player);
+		if (player.hasMongoose) {
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			if (didGetMongooseProc) {
+				mongooseMHProcced(event, events, player);
+			}
 		}
 	}
+	queueNextMHHit();
+}
+
+function processOHHit(event, events, player) {
+	let hitSuccess = player.autoHitRoll();
+	if (hitSuccess == true) {
+		if (player.hasMongoose) {
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			if (didGetMongooseProc) {
+				mongooseOHProcced(event, events, player);
+			}
+		}
+	}
+	queueNextOHHit();
 }
 
 function mongooseMHProcced(event, events, player) {
@@ -274,29 +301,97 @@ function mongooseMHProcced(event, events, player) {
 function mongooseMHFaded(event, events, player) {
 	let lastMongooseTime = player.lastMongooseMHProc;
 	if (event.timestamp < 15.0) {
-		//we got another proc, so ignore this fade
+		//we got another proc, so ignore this	
 	} else {
-		player.mongooseIsUp = false;
+		player.mongooseMHIsUp = false;
+		player.currentavoidance -= 6.00;
+	}
+}
+
+function mongooseOHProcced(event, events, player) {
+	player.lastMongooseOHProc = event.timestamp;
+	if player.mongooseOHIsUp == false {
+		player.currentAvoidance += 6.00;
+		player.mongooseOHIsUp = true;
+	}
+	//queue mongoose proc fading
+	let mongooseOHFadedEvent = Event(timestamp + 15.0, "mongooseOHFaded");
+	insertEvent(events, mongooseOHFadedEvent);
+}
+
+function mongooseOHFaded(event, events, player) {
+	let lastMongooseTime = player.lastMongooseOHProc;
+	if (event.timestamp < 15.0) {
+		//we got another proc, so ignore this	
+	} else {
+		player.mongooseOHIsUp = false;
 		player.currentavoidance -= 6.00;
 	}
 }
 
 function queueNextMHHit(event, events, player) {
 	//schedule next MH hit according to player haste
-	
+	var timeUntilNextMHHit = player.mhSpeed;
+	if (player.sliceAndDiceIsUp) {
+		timeUntilNextMHHit = timeUntilNextMHHit / 1.3;
+	}
+	if (player.bladeFlurryIsUp) {
+		timeUntilNextMHHit = timeUntilNextMHHit / 1.2;
+	}
+	let nextMHHitEvent = Event(event.timestamp + timeUntilNextMHHit, "mhHit");
+	insertEvent(events, nextMHHitEvent);
+}
+
+function queueNextOHHit(event, events, player) {
+	//schedule next OH hit according to player haste
+	var timeUntilNextOHHit = player.ohSpeed;
+	if (player.sliceAndDiceIsUp) {
+		timeUntilNextOHHit = timeUntilNextOHHit / 1.3;
+	}
+	if (player.bladeFlurryIsUp) {
+		timeUntilNextOHHit = timeUntilNextOHHit / 1.2;
+	}
+	let nextOHHitEvent = Event(event.timestamp + timeUntilNextOHHit, "ohHit");
+	insertEvent(events, nextOHHitEvent);
 }
 
 
 function windfuryProcced(event, events, player) {
-	
-}
-
-function processOHHit(event, events, player) {
-	
+	//schedule next MH hit according to player haste
+	var timeUntilNextMHHit = player.mhSpeed;
+	if (player.sliceAndDiceIsUp) {
+		timeUntilNextMHHit = timeUntilNextMHHit / 1.3;
+	}
+	if (player.bladeFlurryIsUp) {
+		timeUntilNextMHHit = timeUntilNextMHHit / 1.2;
+	}
+	let nextMHHitEvent = Event(event.timestamp + timeUntilNextMHHit, "windfuryHit");
+	insertEvent(events, nextMHHitEvent);
 }
 
 function processAbilityHit(event, events, player) {
-	
+	let hitSuccess = player.abilityHitRoll();
+	if (hitSuccess == true) {
+		if (player.hasMongoose) {
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			if (didGetMongooseProc) {
+				mongooseMHProcced(event, events, player);
+			}
+		}
+	}
+}
+
+function processWindfuryHit(event, events, player) {
+	//basically the same as processing a MH hit, but we don't queue another swing
+	let hitSuccess = player.autoHitRoll();
+	if (hitSuccess == true) {
+		if (player.hasMongoose) {
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			if (didGetMongooseProc) {
+				mongooseMHProcced(event, events, player);
+			}
+		}
+	}
 }
 
 function processRefreshSND(event, events, player) {
