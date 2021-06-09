@@ -38,6 +38,8 @@ class Rogue {
 		this.sliceAndDiceIsUp = false;
 		this.bladeFlurryIsUp = false;
 		this.hasMongoose = hasMongoose;
+		this.mhSpeed = mhSpeed;
+		this.ohSpeed = ohSpeed;
 		//chance for mongoose to proc
 		this.mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
 		this.mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
