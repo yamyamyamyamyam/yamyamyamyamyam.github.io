@@ -434,7 +434,7 @@ function processEndEvasion(event, events, player) {
 
 function mongooseOHProcced(event, events, player) {
 	player.lastMongooseOHProc = event.timestamp;
-	if player.mongooseOHIsUp == false {
+	if (player.mongooseOHIsUp) == false {
 		player.currentAvoidance += 6.00;
 		player.mongooseOHIsUp = true;
 	}
@@ -455,7 +455,7 @@ function mongooseOHFaded(event, events, player) {
 
 function mongooseMHProcced(event, events, player) {
 	player.lastMongooseMHProc = event.timestamp;
-	if player.mongooseIsUp == false {
+	if (player.mongooseMHIsUp) == false {
 		player.currentAvoidance += 6.00;
 		player.mongooseIsUp = true;
 	}
