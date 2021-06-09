@@ -41,11 +41,12 @@ class Rogue {
 		this.mhSpeed = parseFloat(mhSpeed);
 		this.ohSpeed = parseFloat(ohSpeed);
 		//chance for mongoose to proc
-		this.mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
-		this.mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
+		this.mongooseProcChanceMH = mongoosePPM / (60 / this.mhSpeed);
+		this.mongooseProcChanceOH = mongoosePPM / (60 / this.ohSpeed);
+		this.hitRating = parseInt(hitRating);
 		
 		//add up hit rating
-		var hitChance = hitRating / 15.77;
+		var hitChance = this.hitRating / 15.77;
 		this.autoMissChance = (28 - hitChance + baseEnemyDodgeChance) / 100;
 		this.abilityMissChance = Math.floor(0, (9 - hitChance)) + baseEnemyDodgeChance;
 		
