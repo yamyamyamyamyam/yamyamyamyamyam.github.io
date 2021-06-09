@@ -18,21 +18,21 @@ class Event {
 
 class Rogue {
 	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose) {
-		this.lastGhostly = nil;
+		this.lastGhostly = null;
 		this.hasCrab = hasCrab; 
-		this.lastCrab = nil;
-		this.lastEvasion = nil;
-		this.lastCheatDeath = nil;
+		this.lastCrab = null;
+		this.lastEvasion = null;
+		this.lastCheatDeath = null;
 		this.energy = 100;	
-		this.lastGCD = nil;
-		this.lastMongooseProc = nil;
-		this.priorityMode = nil;
+		this.lastGCD = null;
+		this.lastMongooseProc = null;
+		this.priorityMode = null;
 		this.poolEnergy = poolEnergy;
 		this.currentAvoidance = currentAvoidance;
 		this.isDead = false;
 		this.prioMode = prioMode;
 		this.impSNDPoints = impSNDPoints;
-		this.lastBladeFlurry = nil;
+		this.lastBladeFlurry = null;
 		this.mongooseIsUp = false;
 		this.sliceAndDiceIsUp = false;
 		this.bladeFlurryIsUp = false;
@@ -50,25 +50,25 @@ class Rogue {
 	}
 	
 	ghostlyIsUp(time) {
-		return (this.lastGhostly == nil || (time - this.lastGhostly) <= 15.0);
+		return (this.lastGhostly == null || (time - this.lastGhostly) <= 15.0);
 	}
 	crabIsUp(time) {
-		return (this.lastCrab == nil || (time - this.lastCrab) <= 180.0);
+		return (this.lastCrab == null || (time - this.lastCrab) <= 180.0);
 	}
 	evasionIsUp(time) {
-		return (this.lastEvasion == nil || (time - this.lastEvasion) <= 210);
+		return (this.lastEvasion == null || (time - this.lastEvasion) <= 210);
 	}
 	cheatDeathIsUp(time) {
-		return (this.lastCheatDeath == nil || (time - this.lastCheatDeath) <= 60);
+		return (this.lastCheatDeath == null || (time - this.lastCheatDeath) <= 60);
 	}
 	bladeFlurryIsUp(time) {
-		return (this.lastBladeFlurry == nil || (time - this.lastBladeFlurry) <= 120);
+		return (this.lastBladeFlurry == null || (time - this.lastBladeFlurry) <= 120);
 	}
 	crabCapped() {
 		return ((100 - this.currentAvoidance) <= CRAB_AVOIDANCE);
 	}
 	mongooseProcActive(time) {
-		if (this.lastMongooseProc == nil) {
+		if (this.lastMongooseProc == null) {
 			return false;
 		} else {
 			return ((time - this.lastMongooseProc) <= 15.0);
@@ -93,7 +93,7 @@ class Rogue {
 				if (this.energy >= 25) {
 					return "bladeFlurry";
 				} else {
-					return nil;
+					return;
 				}
 			}
 			if (this.energy > 80) {
@@ -101,14 +101,14 @@ class Rogue {
 				return "hemo"
 			} else {
 				if (this.poolEnergy == true) {
-					return nil
+					return;
 					//wait
 				} else {
 					if (this.energy > 35) {
-						return "hemo"
+						return "hemo";
 						//use hemo
 					} else {
-						return nil
+						return;
 						//wait 
 					}
 				}
@@ -117,27 +117,27 @@ class Rogue {
 			if (this.prioMode == 1) {
 				if (this.cheatDeathIsUp) {
 					//wait
-					return nil
+					return;
 				} else {
 					if (this.ghostlyIsUp) {
-						return "ghostly"
+						return "ghostly";
 					} else {
 						//are we crab-capped?
 						if (this.crabCapped) {
 							if (this.crabIsUp) {
-								return "crab"
+								return "crab";
 							} else if (this.evasionIsUp) {
-								return "evasion"
+								return "evasion";
 							} else {
-								return nil
+								return;
 							}
 						} else {
 							if (this.evasionIsUp) {
-								return "evasion"
+								return "evasion";
 							} else if (this.crabIsUp) {
-								return "crab"
+								return "crab";
 							} else {
-								return nil
+								return;
 							}
 						}
 					}
@@ -253,7 +253,7 @@ function processEnergyTick(event, events, player) {
 
 function checkForAbilityAndQueue(event, events, player) {
 	let abilityToUse = player.shouldUseAbility(event.timestamp);
-	if (abilityToUse != nil) {
+	if (abilityToUse != null) {
 		let newAbilityEvent = createAbilityEvent(abilityToUse, event.timestamp);
 		insertEvent(events, newAbilityEvent);
 	}
@@ -264,7 +264,7 @@ function checkForAbilityAndQueue(event, events, player) {
 
 function processBossHit(event, events, player) {
 	//check if we got hit
-	let didWeGetHit = player.bossHitRoll()
+	let didWeGetHit = player.bossHitRoll();
 	//if we got hit, check if we died
 	let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
 	if (timeSinceLastCheatDeath <= 60) {
@@ -282,12 +282,12 @@ function processBossHit(event, events, player) {
 function processMHHit(event, events, player) {
 	let hitSuccess = player.autoHitRoll();
 	if (hitSuccess == true) {
-		let didGetWindfuryProc = Math.random() > 0.2
+		let didGetWindfuryProc = Math.random() > 0.2;
 		if (didGetWindfuryProc) {
 			windfuryProcced();
 		}
 		if (player.hasMongoose) {
-			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance;
 			if (didGetMongooseProc) {
 				mongooseMHProcced(event, events, player);
 			}
@@ -356,7 +356,7 @@ function processAbilityHit(event, events, player) {
 	let hitSuccess = player.abilityHitRoll();
 	if (hitSuccess == true) {
 		if (player.hasMongoose) {
-			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance;
 			if (didGetMongooseProc) {
 				mongooseMHProcced(event, events, player);
 			}
@@ -369,7 +369,7 @@ function processWindfuryHit(event, events, player) {
 	let hitSuccess = player.autoHitRoll();
 	if (hitSuccess == true) {
 		if (player.hasMongoose) {
-			let didGetMongooseProc = Math.random() > player.mongooseProcChance
+			let didGetMongooseProc = Math.random() > player.mongooseProcChance;
 			if (didGetMongooseProc) {
 				mongooseMHProcced(event, events, player);
 			}
