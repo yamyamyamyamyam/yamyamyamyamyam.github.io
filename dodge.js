@@ -168,14 +168,21 @@ class Rogue {
 function setup() {
 	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
 	mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
-	let mhSpeedSliceAndDice = mhSpeed / 1.3;
-	let ohSpeedSliceAndDice = ohSpeed / 1.3;
-	let mhSpeedBladeFlurrySliceAndDice = mhSpeedSliceAndDice / 1.2;
-	let ohSpeedBladeFlurrySliceAndDice = ohSpeedSliceAndDice / 1.2;
+	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
+	let hasCrab = document.querySelector("#hasCrab");
+	let poolEnergy = document.querySelector("#poolEnergy");
+	let currentAvoidance = document.querySelector("#currentAvoidance");
+	let prioMode = document.querySelector("#prioMode");
+	let impSNDPoints = document.querySelector("#impSNDPoints");
+	let hitRating = document.querySelector("#hitRating");
+	let mhSpeed = document.querySelector("#mhSpeed");
+	let ohEnergy = document.querySelector("#ohSpeed");
+	let hasMongoose = document.querySelector("#hasMongoose");
+	let player = Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
+	simulateFight(player);
 }
 
-function simulateFight() {
-	let player = Rogue(true);
+function simulateFight(player) {
 	var events = [];
 	//process first energy tick, boss hit, MH hit, OH hit
 	events.push(Event(0.00, energyTick));
@@ -204,27 +211,37 @@ function processNextEvent(events, player) {
 	} else if (event.eventKind == bossHit) {
 		processBossHit(event, events, player);
 	} else if (event.eventKind == mhHit) {
+		processMHHit(event, events, player);
 		//check for mongoose proc, windfury proc, queue next mh hit
 	} else if (event.eventKind == ohHit) {
+		processOHHit(event, events, player);
 		//check for mongoose proc, queue next oh hit
-	} else if (event.eventKind == abilityHit) {
-		//check for mongoose proc, NOT windfury proc, decrement energy
+	} else if (event.eventKind == "hemo") {
+		processAbilityHit(event, events, player);
+	} else if (event.eventKind == "crab") {
+		processCrabStart(event, events, player);
+	} else if (event.eventKind == "ghostly") {
+		//can proc mongoose
+		processAbilityHit(event, events, player);
+		processStartGhostly(event, events, player);
+	} else if (event.eventKind == "evasion") {
+		processEvasionStart(event, events, player);
 	} else if (event.eventKind == refreshSND) {
-		
+		processRefreshSND(event, events, player);
 	} else if (event.eventKind == endGhostly) {
-		
+		processEndGhostly(event, events, player);
 	} else if (event.eventKind == windfuryHit) {
-		
+		processWindfuryHit(event, events, player);
 	} else if (event.eventKind == endCrab) {
-		
+		processEndCrab(event, events, player);
 	} else if (event.eventKind == endEvasion) {
-		
+		processEndEvasion(event, events, player);
 	} else if (event.eventKind == mongooseMHFaded) {
-		
+		mongooseMHFaded(event, events, player);
 	} else if (event.eventKind == mongooseOHFaded) {
-		
+		mongooseOHFaded(event, events, player);
 	} else if (event.eventKind == bladeFlurryUsed) {
-		
+		processStartBladeFlurry(event, events, player);
 	}
 	return false;
 }
@@ -337,6 +354,7 @@ function windfuryProcced(event, events, player) {
 }
 
 function processAbilityHit(event, events, player) {
+	//check for mongoose proc, NOT windfury proc, decrement energy
 	let hitSuccess = player.abilityHitRoll();
 	if (hitSuccess == true) {
 		if (player.hasMongoose) {
