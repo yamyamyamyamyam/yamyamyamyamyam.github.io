@@ -284,12 +284,15 @@ function processBossHit(event, events, player) {
 	let didWeGetHit = player.bossHitRoll();
 	//if we got hit, check if we died
 	if (didWeGetHit == true) {
+		console.log("we got hit at " + event.timestamp);
 		let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
 		if (timeSinceLastCheatDeath <= 60) {
+			console.log("cheat death down, we died");
 			//we fuckin died
 			player.isDead = true;
 			return;
 		} else {
+			console.log("cheat death up, used");
 			player.lastCheatDeath = event.timestamp;
 		}
 	}
