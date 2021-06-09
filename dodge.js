@@ -166,8 +166,6 @@ class Rogue {
 }
 
 function setup() {
-	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
-	mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
 	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
 	let hasCrab = document.querySelector("#hasCrab");
 	let poolEnergy = document.querySelector("#poolEnergy");
@@ -179,6 +177,8 @@ function setup() {
 	let ohEnergy = document.querySelector("#ohSpeed");
 	let hasMongoose = document.querySelector("#hasMongoose");
 	let player = Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
+	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
+	mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
 	simulateFight(player);
 }
 
