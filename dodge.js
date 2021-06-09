@@ -8,6 +8,7 @@ let mhHit = "mhHit";
 let ohHit = "ohHit";
 let abilityHit = "abilityHit";
 let procEnd = "procEnd";
+var bossAttackSpeed = 1.0;
 
 class Event {
 	constructor(timestamp, eventKind) {
@@ -37,7 +38,6 @@ class Rogue {
 		this.sliceAndDiceIsUp = false;
 		this.bladeFlurryIsUp = false;
 		this.hasMongoose = hasMongoose;
-		
 		//chance for mongoose to proc
 		this.mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
 		this.mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
@@ -167,6 +167,7 @@ class Rogue {
 
 function setup() {
 	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
+	bossAttackSpeed = document.querySelector("bossAttackSpeed").value;
 	let hasCrab = document.querySelector("#hasCrab").value;
 	let poolEnergy = document.querySelector("#poolEnergy").value;
 	let currentAvoidance = document.querySelector("#currentAvoidance").value;
