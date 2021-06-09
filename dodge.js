@@ -231,21 +231,21 @@ function processNextEvent(events, player) {
 		processStartGhostly(event, events, player);
 	} else if (event.eventKind == "evasion") {
 		processEvasionStart(event, events, player);
-	} else if (event.eventKind == refreshSND) {
+	} else if (event.eventKind == "refreshSND") {
 		processRefreshSND(event, events, player);
-	} else if (event.eventKind == endGhostly) {
+	} else if (event.eventKind == "endGhostly") {
 		processEndGhostly(event, events, player);
-	} else if (event.eventKind == windfuryHit) {
+	} else if (event.eventKind == "windfuryHit") {
 		processWindfuryHit(event, events, player);
-	} else if (event.eventKind == endCrab) {
+	} else if (event.eventKind == "endCrab") {
 		processEndCrab(event, events, player);
-	} else if (event.eventKind == endEvasion) {
+	} else if (event.eventKind == "endEvasion") {
 		processEndEvasion(event, events, player);
-	} else if (event.eventKind == mongooseMHFaded) {
+	} else if (event.eventKind == "mongooseMHFaded") {
 		mongooseMHFaded(event, events, player);
-	} else if (event.eventKind == mongooseOHFaded) {
+	} else if (event.eventKind == "mongooseOHFaded") {
 		mongooseOHFaded(event, events, player);
-	} else if (event.eventKind == bladeFlurryUsed) {
+	} else if (event.eventKind == "bladeFlurryUsed") {
 		processStartBladeFlurry(event, events, player);
 	}
 	return false;
