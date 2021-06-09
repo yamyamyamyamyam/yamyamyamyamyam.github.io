@@ -302,7 +302,7 @@ function processMHHit(event, events, player) {
 			}
 		}
 	}
-	queueNextMHHit();
+	queueNextMHHit(event, events, player);
 }
 
 function processOHHit(event, events, player) {
@@ -315,7 +315,7 @@ function processOHHit(event, events, player) {
 			}
 		}
 	}
-	queueNextOHHit();
+	queueNextOHHit(event, events, player);
 }
 
 
