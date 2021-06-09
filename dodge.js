@@ -285,8 +285,7 @@ function processBossHit(event, events, player) {
 	//if we got hit, check if we died
 	if (didWeGetHit == true) {
 		console.log("we got hit at " + event.timestamp);
-		let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
-		if (timeSinceLastCheatDeath <= 60) {
+		if (player.cheatDeathIsUp == false) {
 			console.log("cheat death down, we died");
 			//we fuckin died
 			player.isDead = true;
