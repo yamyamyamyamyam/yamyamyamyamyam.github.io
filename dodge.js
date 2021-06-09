@@ -89,11 +89,14 @@ class Rogue {
 	}
 	
 	shouldUseAbility(time) {
+		console.log("current avoidance is " + this.currentAvoidance);
 		if (this.currentAvoidance > 100) {
 			//if we're capped and chilling
 			//if blade flurry is up and we don't have a mongoose proc, use BF
 			if (this.bladeFlurryIsUp && this.mongooseProcActive == false) {
+				console.log("blade flurry is up, mongoose proc is down");
 				if (this.energy >= 25) {
+					console.log("using blade flurry");
 					return "bladeFlurry";
 				} else {
 					return;
@@ -101,16 +104,20 @@ class Rogue {
 			}
 			if (this.energy > 80) {
 				//use hemo
+				console.log("energy above 80, using hemo");
 				return "hemo"
 			} else {
 				if (this.poolEnergy == true) {
+					console.log("pooling energy, waiting");
 					return;
 					//wait
 				} else {
 					if (this.energy > 35) {
+						console.log("not pooling energy, energy above 35, using hemo");
 						return "hemo";
 						//use hemo
 					} else {
+						console.log("not pooling energy, energy below 35, waiting");
 						return;
 						//wait 
 					}
@@ -120,9 +127,11 @@ class Rogue {
 			if (this.prioMode == 1) {
 				if (this.cheatDeathIsUp) {
 					//wait
+					console.log("cheat death is up, we're gonna wait for it to proc");
 					return;
 				} else {
 					if (this.ghostlyIsUp) {
+						console.log("cheat death is down, ghostly is up, using ghostly");
 						return "ghostly";
 					} else {
 						//are we crab-capped?
@@ -170,7 +179,7 @@ class Rogue {
 
 function setup() {
 	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
-	bossAttackSpeed = ParseFloat(document.querySelector("#bossAttackSpeed").value);
+	bossAttackSpeed = parseFloat(document.querySelector("#bossAttackSpeed").value);
 	let hasCrab = document.querySelector("#hasCrab").value;
 	let poolEnergy = document.querySelector("#poolEnergy").value;
 	let currentAvoidance = document.querySelector("#currentAvoidance").value;
