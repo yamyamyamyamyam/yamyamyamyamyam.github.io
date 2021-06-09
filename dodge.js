@@ -176,19 +176,17 @@ function setup() {
 	let mhSpeed = document.querySelector("#mhSpeed");
 	let ohSpeed = document.querySelector("#ohSpeed");
 	let hasMongoose = document.querySelector("#hasMongoose");
-	let player = Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
-	mongooseProcChanceMH = mongoosePPM / (60 / mhSpeed);
-	mongooseProcChanceOH = mongoosePPM / (60 / ohSpeed);
+	let player = new Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
 	simulateFight(player);
 }
 
 function simulateFight(player) {
 	var events = [];
 	//process first energy tick, boss hit, MH hit, OH hit
-	events.push(Event(0.00, energyTick));
-	events.push(Event(0.00, bossHit));
-	events.push(Event(0.00, mhHit));
-	events.push(Event(0.50, ohHit));
+	events.push(new Event(0.00, energyTick));
+	events.push(new Event(0.00, bossHit));
+	events.push(new Event(0.00, mhHit));
+	events.push(new Event(0.50, ohHit));
 	var fightOver = false;
 	while (fightOver == false) {
 		fightOver = processNextEvent(events, player);
@@ -259,7 +257,7 @@ function checkForAbilityAndQueue(event, events, player) {
 		let newAbilityEvent = createAbilityEvent(abilityToUse, event.timestamp);
 		insertEvent(events, newAbilityEvent);
 	}
-	let tickEvent = Event(event.timestamp + 2.00, energyTick);
+	let tickEvent = new Event(event.timestamp + 2.00, energyTick);
 	insertEvent(events, tickEvent);
 }
 
@@ -277,7 +275,7 @@ function processBossHit(event, events, player) {
 		player.lastCheatDeath = event.timestamp;
 	}
 	//queue next boss hit
-	let nextBossHitEvent = Event(event.timestamp + bossAttackSpeed, bossHit);
+	let nextBossHitEvent = new Event(event.timestamp + bossAttackSpeed, bossHit);
 	insertEvent(events, nextBossHitEvent);
 }
 
@@ -322,7 +320,7 @@ function queueNextMHHit(event, events, player) {
 	if (player.bladeFlurryIsUp) {
 		timeUntilNextMHHit = timeUntilNextMHHit / 1.2;
 	}
-	let nextMHHitEvent = Event(event.timestamp + timeUntilNextMHHit, "mhHit");
+	let nextMHHitEvent = new Event(event.timestamp + timeUntilNextMHHit, "mhHit");
 	insertEvent(events, nextMHHitEvent);
 }
 
@@ -335,7 +333,7 @@ function queueNextOHHit(event, events, player) {
 	if (player.bladeFlurryIsUp) {
 		timeUntilNextOHHit = timeUntilNextOHHit / 1.2;
 	}
-	let nextOHHitEvent = Event(event.timestamp + timeUntilNextOHHit, "ohHit");
+	let nextOHHitEvent = new Event(event.timestamp + timeUntilNextOHHit, "ohHit");
 	insertEvent(events, nextOHHitEvent);
 }
 
@@ -349,7 +347,7 @@ function windfuryProcced(event, events, player) {
 	if (player.bladeFlurryIsUp) {
 		timeUntilNextMHHit = timeUntilNextMHHit / 1.2;
 	}
-	let nextMHHitEvent = Event(event.timestamp + timeUntilNextMHHit, "windfuryHit");
+	let nextMHHitEvent = new Event(event.timestamp + timeUntilNextMHHit, "windfuryHit");
 	insertEvent(events, nextMHHitEvent);
 }
 
@@ -384,14 +382,14 @@ function processRefreshSND(event, events, player) {
 	player.energy -= 25;
 	//assume it's a 5pt snd for now...because lazy
 	let nextTimestamp = event.timestamp + (21 * (1 + (.15 * player.impSNDPoints)));
-	let newRefreshEvent = Event(nextTimestamp, "refreshSND");
+	let newRefreshEvent = new Event(nextTimestamp, "refreshSND");
 }
 
 function processStartGhostly(event, events, player) {
 	player.lastGhostly = event.timestamp;
 	player.currentAvoidance += 15.00;
 	player.energy -= 40;
-	let ghostlyFadedEvent = Event(timestamp + 7.0, "ghostlyFaded");
+	let ghostlyFadedEvent = new Event(timestamp + 7.0, "ghostlyFaded");
 	insertEvent(events, ghostlyFadedEvent);
 }
 
@@ -409,7 +407,7 @@ function processStartBladeFlurry(event, events, player) {
 function processStartCrab(event, events, player) {
 	player.lastCrab = event.timestamp;
 	player.currentAvoidance += 6.22;
-	let crabFadedEvent = Event(timestamp + 20.0, "crabFaded");
+	let crabFadedEvent = new Event(timestamp + 20.0, "crabFaded");
 	insertEvent(events, crabFadedEvent);
 }
 
@@ -422,7 +420,7 @@ function processEndCrab(event, events, player) {
 function processStartEvasion(event, events, player) {
 	player.lastEvasion = event.timestamp;
 	player.currentAvoidance += 50.00;
-	let evasionFadedEvent = Event(timestamp + 20.0, "evasionFaded");
+	let evasionFadedEvent = new Event(timestamp + 20.0, "evasionFaded");
 	insertEvent(events, evasionFadedEvent);
 }
 
@@ -439,7 +437,7 @@ function mongooseOHProcced(event, events, player) {
 		player.mongooseOHIsUp = true;
 	}
 	//queue mongoose proc fading
-	let mongooseOHFadedEvent = Event(timestamp + 15.0, "mongooseOHFaded");
+	let mongooseOHFadedEvent = new Event(timestamp + 15.0, "mongooseOHFaded");
 	insertEvent(events, mongooseOHFadedEvent);
 }
 
@@ -460,7 +458,7 @@ function mongooseMHProcced(event, events, player) {
 		player.mongooseIsUp = true;
 	}
 	//queue mongoose proc fading
-	let mongooseFadedEvent = Event(timestamp + 15.0, "mongooseMHFaded");
+	let mongooseFadedEvent = new Event(timestamp + 15.0, "mongooseMHFaded");
 	insertEvent(events, mongooseFadedEvent);
 }
 
@@ -475,7 +473,7 @@ function mongooseMHFaded(event, events, player) {
 }
 
 function createAbilityEvent(abilityString, timestamp) {
-	let newAbilityEvent = Event(timestamp, abilityString);
+	let newAbilityEvent = new Event(timestamp, abilityString);
 	return newAbilityEvent;
 }
 
