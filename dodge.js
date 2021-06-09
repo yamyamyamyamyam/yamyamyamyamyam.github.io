@@ -255,7 +255,7 @@ function processEnergyTick(event, events, player) {
 
 function checkForAbilityAndQueue(event, events, player) {
 	let abilityToUse = player.shouldUseAbility(event.timestamp);
-	if abilityToUse != nil {
+	if (abilityToUse != nil) {
 		let newAbilityEvent = createAbilityEvent(abilityToUse, event.timestamp);
 		insertEvent(events, newAbilityEvent);
 	}
