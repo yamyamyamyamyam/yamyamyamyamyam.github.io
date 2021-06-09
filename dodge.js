@@ -269,13 +269,15 @@ function processBossHit(event, events, player) {
 	//check if we got hit
 	let didWeGetHit = player.bossHitRoll();
 	//if we got hit, check if we died
-	let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
-	if (timeSinceLastCheatDeath <= 60) {
-		//we fuckin died
-		player.isDead = true;
-		return;
-	} else {
-		player.lastCheatDeath = event.timestamp;
+	if (didWeGetHit == true) {
+		let timeSinceLastCheatDeath = event.timestamp - player.lastCheatDeath;
+		if (timeSinceLastCheatDeath <= 60) {
+			//we fuckin died
+			player.isDead = true;
+			return;
+		} else {
+			player.lastCheatDeath = event.timestamp;
+		}
 	}
 	//queue next boss hit
 	let nextBossHitEvent = new Event(event.timestamp + bossAttackSpeed, bossHit);
