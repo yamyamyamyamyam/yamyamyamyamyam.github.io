@@ -165,7 +165,7 @@ class Rogue {
 	}
 	bossHitRoll() {
 		//true if we got hit, false if the boss misses
-		return (Math.random() > this.currentAvoidance);
+		return ((Math.random()*100) > this.currentAvoidance);
 	}
 	autoHitRoll() {
 		//true if we hit, false if we miss
