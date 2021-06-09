@@ -190,7 +190,9 @@ function simulateFight(player) {
 	var fightOver = false;
 	while (fightOver == false) {
 		fightOver = processNextEvent(events, player);
+		console.log("processing event");
 	}
+	console.log("done");
 }
 
 function processNextEvent(events, player) {
