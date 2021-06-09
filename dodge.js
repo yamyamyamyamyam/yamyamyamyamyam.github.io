@@ -167,15 +167,16 @@ class Rogue {
 
 function setup() {
 	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
-	let hasCrab = document.querySelector("#hasCrab");
-	let poolEnergy = document.querySelector("#poolEnergy");
-	let currentAvoidance = document.querySelector("#currentAvoidance");
-	let prioMode = document.querySelector("#prioMode");
-	let impSNDPoints = document.querySelector("#impSNDPoints");
-	let hitRating = document.querySelector("#hitRating");
-	let mhSpeed = document.querySelector("#mhSpeed");
-	let ohSpeed = document.querySelector("#ohSpeed");
-	let hasMongoose = document.querySelector("#hasMongoose");
+	let hasCrab = document.querySelector("#hasCrab").value;
+	let poolEnergy = document.querySelector("#poolEnergy").value;
+	let currentAvoidance = document.querySelector("#currentAvoidance").value;
+	//todo
+	let prioMode = 1;
+	let impSNDPoints = document.querySelector("#impSNDPoints").value;
+	let hitRating = document.querySelector("#hitRating").value;
+	let mhSpeed = document.querySelector("#mhSpeed").value;
+	let ohSpeed = document.querySelector("#ohSpeed").value;
+	let hasMongoose = document.querySelector("#hasMongoose").value;
 	let player = new Rogue(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose);
 	simulateFight(player);
 }
