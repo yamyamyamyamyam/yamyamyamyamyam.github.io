@@ -293,7 +293,7 @@ function processMHHit(event, events, player) {
 	if (hitSuccess == true) {
 		let didGetWindfuryProc = Math.random() > 0.2;
 		if (didGetWindfuryProc) {
-			windfuryProcced();
+			windfuryProcced(event, events, player);
 		}
 		if (player.hasMongoose) {
 			let didGetMongooseProc = Math.random() > player.mongooseProcChance;
