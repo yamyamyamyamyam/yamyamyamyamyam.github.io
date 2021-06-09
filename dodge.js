@@ -223,6 +223,8 @@ function processNextEvent(events, player) {
 		
 	} else if (event.eventKind == mongooseOHFaded) {
 		
+	} else if (event.eventKind == bladeFlurryUsed) {
+		
 	}
 	return false;
 }
@@ -231,6 +233,10 @@ function processEnergyTick(event, events, player) {
 	//increment energy
 	player.energy = Math.max(100, player.energy + 20);
 	//check if we should use an ability
+	checkForAbilityAndQueue(event, events, player);
+}
+
+function checkForAbilityAndQueue(event, events, player) {
 	let abilityToUse = player.shouldUseAbility(event.timestamp);
 	if abilityToUse != nil {
 		let newAbilityEvent = createAbilityEvent(abilityToUse, event.timestamp);
@@ -239,6 +245,7 @@ function processEnergyTick(event, events, player) {
 	let tickEvent = Event(event.timestamp + 2.00, energyTick);
 	insertEvent(events, tickEvent);
 }
+
 
 function processBossHit(event, events, player) {
 	//check if we got hit
@@ -287,47 +294,7 @@ function processOHHit(event, events, player) {
 	queueNextOHHit();
 }
 
-function mongooseMHProcced(event, events, player) {
-	player.lastMongooseMHProc = event.timestamp;
-	if player.mongooseIsUp == false {
-		player.currentAvoidance += 6.00;
-		player.mongooseIsUp = true;
-	}
-	//queue mongoose proc fading
-	let mongooseFadedEvent = Event(timestamp + 15.0, "mongooseMHFaded");
-	insertEvent(events, mongooseFadedEvent);
-}
 
-function mongooseMHFaded(event, events, player) {
-	let lastMongooseTime = player.lastMongooseMHProc;
-	if (event.timestamp < 15.0) {
-		//we got another proc, so ignore this	
-	} else {
-		player.mongooseMHIsUp = false;
-		player.currentavoidance -= 6.00;
-	}
-}
-
-function mongooseOHProcced(event, events, player) {
-	player.lastMongooseOHProc = event.timestamp;
-	if player.mongooseOHIsUp == false {
-		player.currentAvoidance += 6.00;
-		player.mongooseOHIsUp = true;
-	}
-	//queue mongoose proc fading
-	let mongooseOHFadedEvent = Event(timestamp + 15.0, "mongooseOHFaded");
-	insertEvent(events, mongooseOHFadedEvent);
-}
-
-function mongooseOHFaded(event, events, player) {
-	let lastMongooseTime = player.lastMongooseOHProc;
-	if (event.timestamp < 15.0) {
-		//we got another proc, so ignore this	
-	} else {
-		player.mongooseOHIsUp = false;
-		player.currentavoidance -= 6.00;
-	}
-}
 
 function queueNextMHHit(event, events, player) {
 	//schedule next MH hit according to player haste
@@ -402,12 +369,95 @@ function processRefreshSND(event, events, player) {
 	let newRefreshEvent = Event(nextTimestamp, "refreshSND");
 }
 
-function processEndProc(event, events, player) {
+function processStartGhostly(event, events, player) {
+	player.lastGhostly = event.timestamp;
+	player.currentAvoidance += 15.00;
+	player.energy -= 40;
+	let ghostlyFadedEvent = Event(timestamp + 7.0, "ghostlyFaded");
+	insertEvent(events, ghostlyFadedEvent);
+}
+
+function processEndGhostly(event, events, player) {
 	//check if we should use an ability
+	player.currentAvoidance -= 15.00;
+	checkForAbilityAndQueue(event, events, player);
+}
+
+function processStartBladeFlurry(event, events, player) {
+	player.lastBladeFlurry = event.timestamp;
+	player.energy -= 20.00;
+}
+
+function processStartCrab(event, events, player) {
+	player.lastCrab = event.timestamp;
+	player.currentAvoidance += 6.22;
+	let crabFadedEvent = Event(timestamp + 20.0, "crabFaded");
+	insertEvent(events, crabFadedEvent);
+}
+
+function processEndCrab(event, events, player) {
+	//check if we should use an ability
+	player.currentAvoidance -= 6.22;
+	checkForAbilityAndQueue(event, events, player);
+}
+
+function processStartEvasion(event, events, player) {
+	player.lastEvasion = event.timestamp;
+	player.currentAvoidance += 50.00;
+	let evasionFadedEvent = Event(timestamp + 20.0, "evasionFaded");
+	insertEvent(events, evasionFadedEvent);
+}
+
+function processEndEvasion(event, events, player) {
+	//check if we should use an ability
+	player.currentAvoidance -= 50.00;
+	checkForAbilityAndQueue(event, events, player);
+}
+
+function mongooseOHProcced(event, events, player) {
+	player.lastMongooseOHProc = event.timestamp;
+	if player.mongooseOHIsUp == false {
+		player.currentAvoidance += 6.00;
+		player.mongooseOHIsUp = true;
+	}
+	//queue mongoose proc fading
+	let mongooseOHFadedEvent = Event(timestamp + 15.0, "mongooseOHFaded");
+	insertEvent(events, mongooseOHFadedEvent);
+}
+
+function mongooseOHFaded(event, events, player) {
+	let lastMongooseTime = player.lastMongooseOHProc;
+	if (event.timestamp < 15.0) {
+		//we got another proc, so ignore this	
+	} else {
+		player.mongooseOHIsUp = false;
+		player.currentavoidance -= 6.00;
+	}
+}
+
+function mongooseMHProcced(event, events, player) {
+	player.lastMongooseMHProc = event.timestamp;
+	if player.mongooseIsUp == false {
+		player.currentAvoidance += 6.00;
+		player.mongooseIsUp = true;
+	}
+	//queue mongoose proc fading
+	let mongooseFadedEvent = Event(timestamp + 15.0, "mongooseMHFaded");
+	insertEvent(events, mongooseFadedEvent);
+}
+
+function mongooseMHFaded(event, events, player) {
+	let lastMongooseTime = player.lastMongooseMHProc;
+	if (event.timestamp < 15.0) {
+		//we got another proc, so ignore this	
+	} else {
+		player.mongooseMHIsUp = false;
+		player.currentavoidance -= 6.00;
+	}
 }
 
 function createAbilityEvent(abilityString, timestamp) {
-	let newAbilityEvent = Event(timestamp + .5, abilityString);
+	let newAbilityEvent = Event(timestamp, abilityString);
 	return newAbilityEvent;
 }
 
