@@ -20,7 +20,7 @@ class Event {
 class Rogue {
 	constructor(hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose) {
 		this.lastGhostly = null;
-		this.hasCrab = hasCrab; 
+		this.hasCrab = (hasCrab == "on") ? true : false;
 		this.lastCrab = null;
 		this.lastEvasion = null;
 		this.lastCheatDeath = null;
@@ -28,11 +28,11 @@ class Rogue {
 		this.lastGCD = null;
 		this.lastMongooseProc = null;
 		this.prioMode = 1;
-		this.poolEnergy = poolEnergy;
-		this.currentAvoidance = currentAvoidance;
+		this.poolEnergy = (poolEnergy == "on") ? true : false;
+		this.currentAvoidance = parseFloat(currentAvoidance);
 		this.isDead = false;
 		this.prioMode = prioMode;
-		this.impSNDPoints = impSNDPoints;
+		this.impSNDPoints = parseInt(impSNDPoints);
 		this.lastBladeFlurry = null;
 		this.mongooseIsUp = false;
 		this.sliceAndDiceIsUp = false;
