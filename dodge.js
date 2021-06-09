@@ -167,7 +167,7 @@ class Rogue {
 
 function setup() {
 	//hasCrab, poolEnergy, currentAvoidance, prioMode, impSNDPoints, hitRating, mhSpeed, ohSpeed, hasMongoose
-	bossAttackSpeed = document.querySelector("bossAttackSpeed").value;
+	bossAttackSpeed = document.querySelector("#bossAttackSpeed").value;
 	let hasCrab = document.querySelector("#hasCrab").value;
 	let poolEnergy = document.querySelector("#poolEnergy").value;
 	let currentAvoidance = document.querySelector("#currentAvoidance").value;
