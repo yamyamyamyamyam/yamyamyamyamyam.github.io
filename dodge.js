@@ -53,19 +53,19 @@ class Rogue {
 	}
 	
 	ghostlyIsUp(time) {
-		return (this.lastGhostly == null || (time - this.lastGhostly) <= 15.0);
+		return (this.lastGhostly == null || (time - this.lastGhostly) >= 15.0);
 	}
 	crabIsUp(time) {
-		return (this.lastCrab == null || (time - this.lastCrab) <= 180.0);
+		return (this.lastCrab == null || (time - this.lastCrab) >= 180.0);
 	}
 	evasionIsUp(time) {
-		return (this.lastEvasion == null || (time - this.lastEvasion) <= 210);
+		return (this.lastEvasion == null || (time - this.lastEvasion) >= 210);
 	}
 	cheatDeathIsUp(time) {
-		return (this.lastCheatDeath == null || (time - this.lastCheatDeath) <= 60);
+		return (this.lastCheatDeath == null || (time - this.lastCheatDeath) >= 60);
 	}
 	bladeFlurryIsUp(time) {
-		return (this.lastBladeFlurry == null || (time - this.lastBladeFlurry) <= 120);
+		return (this.lastBladeFlurry == null || (time - this.lastBladeFlurry) >= 120);
 	}
 	crabCapped() {
 		return ((100 - this.currentAvoidance) <= CRAB_AVOIDANCE);
